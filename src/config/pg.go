@@ -36,7 +36,7 @@ func Connect() (*gorm.DB, error) {
 			return nil, fmt.Errorf("missing environment	 variables")	
 		}	
 
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s  sslmode=enable TimeZone=GMT+1",	
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s  sslmode=disable TimeZone=GMT+1",	
 		config.Host, config.User, config.Pass, config.Name, config.Port)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
