@@ -29,10 +29,6 @@ func main() {
 		panic(err)
 	}
 
-	//routes
-
-
-	//middlewares 
 	healthGroup := e.Group("/health")
 	routes.HealthRoute(healthGroup)
 
