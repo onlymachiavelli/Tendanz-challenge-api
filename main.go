@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"tendanz/src/config"
 	"tendanz/src/routes"
 
 	"github.com/joho/godotenv"
@@ -22,9 +23,22 @@ func main() {
 		panic("error loading the env")
 	}
 
+	//connect db 
+	db, err := config.Connect()	
+	if err != nil {	
+		panic(err)
+	}
+
+	//routes
+
+
 	//middlewares 
 	healthGroup := e.Group("/health")
 	routes.HealthRoute(healthGroup)
+
+	clientGroup := e.Group("/client")
+	routes.ClientRoute(clientGroup, db)
+
 
 
 	e.Logger.Fatal(e.Start(":"+PORT))
