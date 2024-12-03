@@ -7,11 +7,29 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
+func injectCors(e *echo.Echo) {
+	devMode := true
+	if (devMode) {
+		e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+			AllowOrigins: []string{"*"},
+			AllowHeaders: []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
+		  }))
+
+	} else {
+		e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+			AllowOrigins: []string{"*"},
+			AllowHeaders: []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
+		  }))
+	}
+}
 
 func main() {
 
 	e := echo.New()
+
+	injectCors(e)
 
 
 	errLoading :=godotenv.Load() 
