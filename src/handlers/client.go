@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"tendanz/src/config"
 	"tendanz/src/models"
 	"tendanz/src/services"
@@ -168,5 +169,90 @@ func Delete(c echo.Context , db *gorm.DB) error {
 }
 
 func VerifyAccount(c echo.Context , db *gorm.DB) error {
-	return nil
+
+	payload := requests.VerifyCode{}	
+
+
+	if err := c.Bind(&payload); err != nil {	
+		return c.JSON(400, map[string]interface{}{
+			"message": "invalid payload",
+		})
+	}
+
+	if payload.Code == "" {
+		return c.JSON(
+			400,
+			map[string]interface{}{
+				"message": "please provide a valid code",	
+			})
+	}
+
+
+	idClient := c.Get("user")
+	if idClient == nil {
+		return c.JSON(
+			401, 
+			map[string]interface{}{
+				"message": "unauthorized",
+			},
+		)
+	}
+
+
+	clientServices := services.ServiceImpl{}	
+	target, errFinding := clientServices.FindOneBy("id", fmt.Sprintf("%v" , idClient), db)	
+	if errFinding != nil {
+		return c.JSON(400, map[string]interface{}{
+			"message": errFinding.Error(),
+		})
+	}
+
+	if target.ID == 0 {
+		return c.JSON(400, map[string]interface{}{
+			"message": "record not found",
+		})	
+	}
+
+	rds, errConnecting := config.ConnectRedis()	
+	if errConnecting != nil {
+		return c.JSON(400, map[string]interface{}{
+			"message": "error connecting to redis",
+		})
+	}
+
+	code, errGetting := rds.Get(c.Request().Context(), target.Email).Result()		
+	if errGetting != nil || code == "" {
+		return c.JSON(400, map[string]interface{}{
+			"message": "error getting code",
+		})
+	}
+
+
+	if code != payload.Code {
+		return c.JSON(400, map[string]interface{}{
+			"message": "invalid code",
+		})
+	}	
+
+
+	errDeleting := rds.Del(c.Request().Context(), target.Email).Err()	
+	if errDeleting != nil {
+		return c.JSON(400, map[string]interface{}{
+			"message": "error deleting code",
+		})
+	}
+
+	target.Verified = true	
+	//change it later 
+
+	errUpdating := db.Save(&target).Error
+	if errUpdating != nil {
+		return c.JSON(400, map[string]interface{}{
+			"message": "error updating record",
+		})
+	}
+
+	return c.JSON(200, map[string]interface{}{
+		"message": "account verified",
+	})
 }

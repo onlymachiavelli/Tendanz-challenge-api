@@ -9,7 +9,7 @@ services:
     ports:
       - "3001:3001"
     environment:
-      - PORT=8080
+      - PORT=3001
       - DATABASE_URL=postgresql://user:root@postgres:2345/tendanz
       - REDIS_URL=redis://redis:6379
     depends_on:
