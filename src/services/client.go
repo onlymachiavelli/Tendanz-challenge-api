@@ -14,8 +14,6 @@ type Service interface {
 	CreateRecord(db *gorm.DB , record models.Client)(models.Client , error)
 	DeleteOne(db *gorm.DB, target string) (bool , error)
 
-	//this one is only for test 
-
 	UpdateOne(db *gorm.DB , record models.Client) (models.Client , error)
 	GetAll(db *gorm.DB) ([]models.Client , error)	
 }
@@ -28,16 +26,11 @@ func (u *ServiceImpl) FindOneBy(field string , value string , db *gorm.DB) (mode
 		return models.Client{} , errors.New("please provide valid arguments")
 	}
 	target := models.Client{}
-	errFinding := db.Where(field + " = ?" +value).First(&target).Error
-	if (errFinding != nil) {
-		return models.Client{} , errFinding
-	}
+	errFinding := db.Where(field + " = ?" , value,).First(&target).Error
+	
 
-	if target.ID == 0 {
-		return models.Client{} , errors.New("record not found")
-	}
 
-	return  target , nil
+	return  target , errFinding
 }
 
 func (u *ServiceImpl)CreateRecord(db *gorm.DB , record models.Client) ( models.Client , error) {
@@ -45,21 +38,20 @@ func (u *ServiceImpl)CreateRecord(db *gorm.DB , record models.Client) ( models.C
 	if record.Email == "" || record.FirstName == "" || record.LastName =="" || record.Password =="" {
 		return record,errors.New("please provide a valid payload") 
 	}
-	targetByPhone , errFindingByMail := u.FindOneBy("phone" , record.Email, db) 
-	if errFindingByMail != nil {
-		return models.Client{} ,errFindingByMail
-	}
+	targetByPhone , _ := u.FindOneBy("phone" , record.Phone, db) 
+	
+
+
+	
 
 
 	if targetByPhone.ID != 0 {
 		return models.Client{} , errors.New("phone already used")
 	}
 
-	targetByEmail , errFindingByMail := u.FindOneBy("email" , record.Email, db)
+	targetByEmail , _ := u.FindOneBy("email" , record.Email, db)
 
-	if errFindingByMail != nil {
-		return models.Client{} ,errFindingByMail
-	}
+	
 
 	if targetByEmail.ID != 0 {
 		return models.Client{} , errors.New("email already used")

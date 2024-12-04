@@ -14,6 +14,8 @@ import (
 )
 
 func Register(c echo.Context, db *gorm.DB) error {
+
+	fmt.Println("registering client")
 	payload := requests.ClientRegister{}
 	if err := c.Bind(&payload); err != nil {
 		return c.JSON(400, map[string]interface{}{
@@ -74,6 +76,7 @@ func Register(c echo.Context, db *gorm.DB) error {
 		time.Minute * 5,
 	).Err()
 	if errSetting != nil {
+		fmt.Println("code issue : ",errSetting)	
 		return c.JSON(400, map[string]interface{}{
 
 			"message": "error setting code",
@@ -124,7 +127,7 @@ func Login(c echo.Context, db *gorm.DB) error {
 		})
 	}
 
-	if !utils.Verify(target.Password, payload.Password) {
+	if !utils.Verify(payload.Password, target.Password) {
 		return c.JSON(400, map[string]interface{}{
 			"message": "invalid credentials",
 		})
@@ -188,7 +191,7 @@ func VerifyAccount(c echo.Context , db *gorm.DB) error {
 	}
 
 
-	idClient := c.Get("user")
+	idClient := c.Get("client")
 	if idClient == nil {
 		return c.JSON(
 			401, 
@@ -223,7 +226,7 @@ func VerifyAccount(c echo.Context , db *gorm.DB) error {
 	code, errGetting := rds.Get(c.Request().Context(), target.Email).Result()		
 	if errGetting != nil || code == "" {
 		return c.JSON(400, map[string]interface{}{
-			"message": "error getting code",
+			"message": "Code expired",
 		})
 	}
 

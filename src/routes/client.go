@@ -2,6 +2,7 @@ package routes
 
 import (
 	"tendanz/src/handlers"
+	"tendanz/src/middleware"
 
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
@@ -9,17 +10,21 @@ import (
 
 func ClientRoute(g *echo.Group, db *gorm.DB) error{
 
-
 	g.POST("/register", func(c echo.Context) error {
 		return handlers.Register(c, db)
 	})
 
 	g.POST("/login", func(c echo.Context) error {	
-		return handlers.Login(c, db)
+		return handlers.Login(c, db)	
 	})
 
-	
+	protected := g.Group("")
+	protected.Use(middleware.ClientAuth)
+
+	protected.POST("/verify", func(c echo.Context) error {
+		return handlers.VerifyAccount(c, db)
+	})
+
 	return nil 
-	
 	
 }
