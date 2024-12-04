@@ -34,6 +34,7 @@ func Register(c echo.Context, db *gorm.DB) error {
 		FirstName: payload.FirstName,
 		LastName: payload.LastName,
 		Phone: payload.Phone,
+		Birthdate: payload.Birthdate,
 		Verified: false,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
@@ -298,3 +299,73 @@ func GetProfile(c echo.Context , db *gorm.DB) error {
 	return c.JSON(200, data)
 
 }	
+
+func ResendVerificationCode( c echo.Context , db*gorm.DB) error {
+	idClient := c.Get("client")
+	if idClient == nil {
+		return c.JSON(
+			401,
+			map[string]interface{}{
+				"message" : "Not Authorized !" ,
+			},
+		)
+	}
+
+
+	clientServices := services.ServiceImpl{}	
+
+
+	target, errFinding := clientServices.FindOneBy("id", fmt.Sprintf("%v" , idClient), db)	
+
+	if errFinding != nil {
+		return c.JSON(400, map[string]interface{}{
+			"message": errFinding.Error(),
+		})
+
+	}
+
+	if target.ID == 0 {
+		return c.JSON(400, map[string]interface{}{
+			"message": "Client not Found",
+		})
+	}
+
+	code := utils.GenerateCode()	
+	if code == "" {	
+		return c.JSON(400, map[string]interface{}{
+			"message": "error generating code",
+		})
+	}
+
+
+	rds, errConnecting := config.ConnectRedis()
+	if errConnecting != nil {
+		return c.JSON(400, map[string]interface{}{
+			"message": "error connecting to redis",
+		})
+	}
+
+	errSetting := rds.Set(
+		c.Request().Context(),
+		target.Email,
+		code,
+		time.Minute * 5,
+	).Err()
+	if errSetting != nil {
+		return c.JSON(400, map[string]interface{}{
+			"message": "error setting code",
+		})
+	}
+
+	errSending := utils.SendCode(target.Email,  code)
+	if errSending != nil {
+		return c.JSON(400, map[string]interface{}{
+			"message": "error sending email",
+		})
+	}
+
+	return c.JSON(200, map[string]interface{}{
+		"message": "code sent successfully",
+	})
+
+}

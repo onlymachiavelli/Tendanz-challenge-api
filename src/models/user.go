@@ -10,6 +10,7 @@ type Client struct {
 	Password  string `json:"password" gorm:"not null"`
 	Phone string `json:"phone" gorm:"unique"`
 	Verified bool   `json:"verified"`
+	Birthdate time.Time `json:"birthdate"`	
 	VerifiedAt time.Time `json:"verified_at"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
