@@ -25,6 +25,10 @@ func ClientRoute(g *echo.Group, db *gorm.DB) error{
 		return handlers.VerifyAccount(c, db)
 	})
 
+	protected.GET("/profile", func(c echo.Context) error {
+		return handlers.GetProfile(c, db)	
+	})
+
 	return nil 
 	
 }

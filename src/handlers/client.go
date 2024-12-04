@@ -190,7 +190,6 @@ func VerifyAccount(c echo.Context , db *gorm.DB) error {
 			})
 	}
 
-
 	idClient := c.Get("client")
 	if idClient == nil {
 		return c.JSON(
@@ -200,7 +199,6 @@ func VerifyAccount(c echo.Context , db *gorm.DB) error {
 			},
 		)
 	}
-
 
 	clientServices := services.ServiceImpl{}	
 	target, errFinding := clientServices.FindOneBy("id", fmt.Sprintf("%v" , idClient), db)	
@@ -259,3 +257,44 @@ func VerifyAccount(c echo.Context , db *gorm.DB) error {
 		"message": "account verified",
 	})
 }
+
+func GetProfile(c echo.Context , db *gorm.DB) error {
+
+	idClient := c.Get("client")	
+
+	if idClient == nil {
+	
+		return c.JSON(401, map[string]interface{}{
+			"message": "unauthorized",
+		})
+
+	}
+
+	clientServices := services.ServiceImpl{}	
+	target, errFinding := clientServices.FindOneBy("id", fmt.Sprintf("%v" , idClient), db)
+	if errFinding != nil {
+		return c.JSON(400, map[string]interface{}{
+			"message": errFinding.Error(),
+		})
+	}
+
+	if target.ID == 0 {
+		return c.JSON(400, map[string]interface{}{
+			"message": "record not found",
+		})
+	}
+
+	data := map[string]interface{}{	
+		"id": target.ID,
+		"email": target.Email,
+		"first_name": target.FirstName,
+		"last_name": target.LastName,
+		"phone": target.Phone,
+		"verified": target.Verified,
+		"created_at": target.CreatedAt,
+		"updated_at": target.UpdatedAt,
+	}
+
+	return c.JSON(200, data)
+
+}	
