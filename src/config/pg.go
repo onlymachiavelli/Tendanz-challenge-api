@@ -3,7 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
-	"tendanz/src/models"
+	"tendanz/src/migrators"
 
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
@@ -43,10 +43,24 @@ func Connect() (*gorm.DB, error) {
 		return nil, err
 	}
 	
-	errMigratingClient := db.AutoMigrate(&models.Client{})
+	errMigratingClient := migrators.MigrateUser(db)
 	if errMigratingClient != nil {
 		return nil, errMigratingClient
 	}
+
+	errMigratingAdmin := migrators.MigrateAdmin(db)	
+	if errMigratingAdmin != nil {
+		return nil, errMigratingAdmin
+	}
+	
+
+
+	errMigratingContracts := migrators.MigrateContracts(db)
+	if errMigratingContracts != nil {
+		return nil, errMigratingContracts
+	}
+
+
 
 	return db, nil 
 }

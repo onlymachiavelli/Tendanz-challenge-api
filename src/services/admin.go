@@ -29,5 +29,8 @@ func (u *AdminService) FindAdminBy(field string, value string, db *gorm.DB) ( mo
 }
 
 func (u *AdminService) CreateRecord(record models.Admin , db *gorm.DB) error {
-	return nil 
+	
+	errCreating := db.Create(&record).Error
+	return errCreating
+
 }

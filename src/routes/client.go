@@ -31,7 +31,7 @@ func ClientRoute(g *echo.Group, db *gorm.DB) error{
 
 	protected.PUT("/verify", func(c echo.Context) error {	
 		return handlers.ResendVerificationCode(c, db)	
-	})
+	}) 
 
 
 	return nil 

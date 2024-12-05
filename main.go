@@ -53,6 +53,10 @@ func main() {
 	clientGroup := e.Group("/client")
 	routes.ClientRoute(clientGroup, db)
 
+	adminGroup := e.Group("/admin")	
+	routes.AdminRoutes(adminGroup, db)
+
+
 
 
 	e.Logger.Fatal(e.Start(":"+PORT))

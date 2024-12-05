@@ -16,6 +16,6 @@ type LoginClient struct {
 	Password string `json:"password" form:"password" query:"password" validate:"required"`
 }
 
-type VerifyCode struct {
+type VerifyCode struct  {
 	Code string `json:"code" form:"code" query:"code" validate:"required"`
 }
