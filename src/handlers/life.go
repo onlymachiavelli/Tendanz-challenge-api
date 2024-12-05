@@ -96,15 +96,48 @@ func GetLifeInsurranceContracts(c echo.Context, db *gorm.DB) error {
 }
 
 
-//as client 
+//as admin 
 
-func GetAllMyLifeContracts(c echo.Context, db *gorm.DB) error {
-	idClient := c.Get("client")
-	if idClient == nil {
+func GetClientLifeInsurrance(c echo.Context, db *gorm.DB) error {
+	idAdmin := c.Get("admin")
+	if idAdmin == nil {
 		return c.JSON(400, map[string]interface{}{
 			"message": "client id is required",
 		})
 	}
+
+	adminServices := services.AdminService{}
+
+
+	admin , errGettingAdmin := adminServices.FindAdminBy("id", fmt.Sprintf("%v", idAdmin) , db)
+	
+	if errGettingAdmin != nil {
+		return c.JSON(
+			400 , map[string]interface{}{
+				"message" : "You're unauthorized, please login First",
+			} ,
+		)
+	}
+
+	if admin.ID == 0 {
+		return c.JSON(
+			404 , map[string]interface{}{
+				"message" : "Admin Not Found",
+			} ,
+		)
+	}
+
+	idClient := c.Param("id")
+	if idClient == "" {
+		return c.JSON(
+			400, 
+			map[string]interface{}{
+				"message" : "Please Select a Client",
+			},
+		)
+	}
+
+
 
 	lifeServices := services.LifeInsuranceService{}
 	clientServices := services.ServiceImpl{}
@@ -138,12 +171,47 @@ func GetAllMyLifeContracts(c echo.Context, db *gorm.DB) error {
 
 
 
-//this is accessible by admin 
 
 
-func GetLifeContractsForClient(c echo.Context , db*gorm.DB) error {
+//as client
+func GetLifeContractsAsClient(c echo.Context , db*gorm.DB) error {
 
-	return nil 
+	idClient := c.Get("client")
+	if idClient == nil {
+		return c.JSON(400, map[string]interface{}{
+			"message" : "Unauthorized, Please Login",
+		})
+	}
+
+	clientServices := services.ServiceImpl{}
+
+
+	client, errGettingClient := clientServices.FindOneBy("id",fmt.Sprintf("%v" , idClient), db) 
+
+	if errGettingClient != nil  || client.ID == 0{
+		return c.JSON(
+			404, map[string]interface{}{
+				"message":"Client is not found",
+			},
+		)
+	}
+
+	lifeContractServices := services.LifeInsuranceService{}
+
+	lifes, errGettingLifes := lifeContractServices.GetLifeContractsByClient(fmt.Sprintf("%v", client.ID), db)
+	
+	if errGettingLifes != nil {
+		return c.JSON(500 , map[string]interface{}{
+			"message" : "Internal Error while getting your contracts, please report that !", 
+		})
+	}
+
+	return c.JSON(
+		200 , map[string]interface{}{
+			"contracts" : lifes,
+		},
+	)
+
 }
 
 
