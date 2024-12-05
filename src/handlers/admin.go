@@ -145,7 +145,7 @@ func LoginAdmin(c echo.Context,db*gorm.DB) error {
 func GetAdminProfile(c echo.Context, db *gorm.DB) error {
 
 	adminServices := services.AdminService{}
-	idAdmin := c.Get("user")
+	idAdmin := c.Get("admin")
 	if idAdmin == nil {
 		return c.JSON(401,
 			map[string]interface{}{

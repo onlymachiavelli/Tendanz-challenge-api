@@ -56,6 +56,10 @@ func main() {
 	adminGroup := e.Group("/admin")	
 	routes.AdminRoutes(adminGroup, db)
 
+	contractRoute := e.Group("/contract")
+	routes.ContractRoutes(contractRoute, db)
+	
+
 
 
 
