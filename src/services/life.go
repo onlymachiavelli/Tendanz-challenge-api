@@ -86,3 +86,13 @@ func (u* LifeInsuranceService)UpdateLifeContract(record models.LifeInsurance, db
 
 	return record, nil
 }
+
+
+func (u*LifeInsuranceService)DeleteLifeContract( record models.LifeInsurance, db *gorm.DB) error {
+	errDeleting := db.Delete(&record).Error
+
+	if errDeleting != nil {
+		return errDeleting
+ 	}
+	return nil
+}

@@ -82,8 +82,65 @@ func CreateLifeInsurranceContract(c echo.Context, db *gorm.DB) error {
 }
 
 
+
+//by client 
 func DeleteLifeInsurrance(c echo.Context, db *gorm.DB) error {
-	return nil
+	idClient := c.Get("client")
+	if idClient == nil {
+		return c.JSON(400, map[string]interface{}{
+			"message": "client id is required",
+		})
+	}
+
+	lifeServices := services.LifeInsuranceService{}
+	clientServices := services.ServiceImpl{}
+
+	client, err := clientServices.FindOneBy("id", fmt.Sprintf("%v" , idClient), db)
+
+	if err != nil {
+		return c.JSON(400, map[string]interface{}{
+			"message": "client not found",
+		})
+	}
+
+	lifeContractId := c.Param("id")
+	if lifeContractId == "" {
+		return c.JSON(400, map[string]interface{}{
+			"message": "life contract id is required",
+		})
+	}
+
+	lifeContract, err := lifeServices.GetOneLifeContract(lifeContractId, db)
+	if err != nil {
+		return c.JSON(400, map[string]interface{}{
+			"message": "error getting life contract",
+		})
+	}
+
+	if lifeContract.ID == 0 {
+		return c.JSON(400, map[string]interface{}{
+			"message": "life contract not found",
+		})
+	}
+
+	if lifeContract.ClientID != int(client.ID) {
+		return c.JSON(400, map[string]interface{}{
+			"message": "unauthorized",
+		})
+	}
+
+
+	errDeleting := lifeServices.DeleteLifeContract(lifeContract, db)
+	if errDeleting != nil {
+		return c.JSON(400, map[string]interface{}{
+			"message": "error deleting life contract",
+		})
+	}
+
+	return c.JSON(200, map[string]interface{}{
+		"message": "life contract deleted",
+	})
+
 }
 
 
@@ -454,3 +511,66 @@ func RejectLifeContract(c echo.Context, db *gorm.DB) error {
 	})
 
 }	
+
+
+
+
+func GetOneLifeContractByClient(c echo.Context, db *gorm.DB) error {
+
+
+	idClient := c.Get("client")	
+	if idClient == nil {
+		return c.JSON(400, map[string]interface{}{
+			"message" : "Unauthorized, Please Login",
+		})
+	}
+
+	clientServices := services.ServiceImpl{}
+
+	client, errGettingClient := clientServices.FindOneBy("id",fmt.Sprintf("%v" , idClient), db)	
+
+	if errGettingClient != nil  || client.ID == 0{
+		return c.JSON(
+			404, map[string]interface{}{
+				"message":"Client is not found",
+			},
+		)
+	}
+
+	lifeContractServices := services.LifeInsuranceService{}
+
+	lifeContractId := c.Param("id")
+	if lifeContractId == "" {
+		return c.JSON(400, map[string]interface{}{
+			"message" : "Please select a contract",
+		})
+	}
+
+	lifeContract, errGettingLifeContract := lifeContractServices.GetOneLifeContract(lifeContractId, db)
+
+	if errGettingLifeContract != nil {
+		return c.JSON(400, map[string]interface{}{
+			"message" : "Error while getting the contract",
+		})
+	}
+
+	if lifeContract.ID == 0 {
+		return c.JSON(400, map[string]interface{}{
+			"message" : "Contract not found",
+		})
+	}
+
+	if lifeContract.ClientID != int(client.ID) {
+		return c.JSON(400, map[string]interface{}{
+			"message" : "Unauthorized",
+		})
+	}
+
+	return c.JSON(
+		200 , map[string]interface{}{
+			"contract" : lifeContract,
+		},
+	)
+
+
+}

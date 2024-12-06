@@ -22,10 +22,19 @@ func ContractRoutes(e *echo.Group, db *gorm.DB) error{
 		return handlers.CreateLifeInsurranceContract(c, db)
 	})
 
+	protectedClient.GET("/life/mine/:id", func (c echo.Context) error  {
+		return handlers.GetOneLifeContractByClient(c , db)
+		
+	})
 	protectedClient.GET("/life/mine", func (c echo.Context) error  {
 		return handlers.GetLifeContractsAsClient(c , db)
 		
 	})
+	protectedClient.DELETE("/life/:id", func(c echo.Context) error {	
+		return handlers.DeleteLifeInsurrance(c, db)
+	})
+
+
 	protectedAdmin.GET("/life/client/:id" , func ( c echo.Context) error {
 		return handlers.GetClientLifeInsurrance(c , db)
 	})
