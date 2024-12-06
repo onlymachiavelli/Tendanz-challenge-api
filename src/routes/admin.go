@@ -23,5 +23,14 @@ func AdminRoutes(g *echo.Group , db *gorm.DB) error {
 		return handlers.GetAdminProfile(c , db)
 	})
 
+	protectedAdmin.GET("/clients", func(c echo.Context) error {
+		return handlers.GetAllClients(c , db)
+	})
+
+	protectedAdmin.GET("/stats" , func(c echo.Context) error {
+		return handlers.AdminStat(c , db)	
+	})
+
+
 	return nil
 }

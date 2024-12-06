@@ -93,3 +93,53 @@ func (u*LifeInsuranceService)DeleteLifeContract( record models.LifeInsurance, db
  	}
 	return nil
 }
+
+func (u*LifeInsuranceService)GetAllLifeContracts(db *gorm.DB) ([]models.LifeInsurance, error) {	
+	lifeContracts := []models.LifeInsurance{}
+	errFinding := db.Find(&lifeContracts).Error
+
+	if errFinding != nil {
+		return []models.LifeInsurance{}, errFinding
+	}
+
+	return lifeContracts, nil
+}	
+
+
+func (u *LifeInsuranceService)GetPendingContracts( db *gorm.DB) ([]models.LifeInsurance, error) {
+	
+	life := []models.LifeInsurance{}
+	errFinding := db.Where("status = 'pending'").Find(&life).Error
+
+	if errFinding != nil {
+		return []models.LifeInsurance{}, errFinding
+	}
+
+	return life, nil
+}
+
+
+//get approved 
+func (u *LifeInsuranceService)GetApprovedContracts( db *gorm.DB) ([]models.LifeInsurance, error) {	
+	life := []models.LifeInsurance{}
+	errFinding := db.Where("status = 'approved'").Find(&life).Error
+
+	if errFinding != nil {
+		return []models.LifeInsurance{}, errFinding
+	}
+
+	return life, nil
+}
+
+//get rejected
+func (u *LifeInsuranceService)GetRejectedContracts( db *gorm.DB) ([]models.LifeInsurance, error) {	
+	life := []models.LifeInsurance{}
+	errFinding := db.Where("status = 'rejected'").Find(&life).Error
+
+	if errFinding != nil {
+		return []models.LifeInsurance{}, errFinding
+	}
+
+	return life, nil
+}
+

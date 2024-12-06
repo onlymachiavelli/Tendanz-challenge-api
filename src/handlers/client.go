@@ -369,3 +369,24 @@ func ResendVerificationCode( c echo.Context , db*gorm.DB) error {
 	})
 
 }
+
+func GetAllClients(c echo.Context , db *gorm.DB) error {
+	idAdmin := c.Get("admin")	
+	if idAdmin == nil {
+		return c.JSON(401, map[string]interface{}{
+			"message": "unauthorized",
+		})
+	}
+
+	clientServices := services.ServiceImpl{}
+
+	clients, err := clientServices.GetAll(db)
+	if err != nil {
+		return c.JSON(400, map[string]interface{}{
+			"message": err.Error(),
+		})
+	}
+
+	return c.JSON(200, clients)
+
+}	

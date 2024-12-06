@@ -110,7 +110,7 @@ func (u *ServiceImpl)UpdateOne(db *gorm.DB , record models.Client) (models.Clien
 	return targetRecord , nil
 }
 
-func GetAll(db *gorm.DB) ([]models.Client , error) {
+func (u *ServiceImpl) GetAll(db *gorm.DB) ([]models.Client , error) {
 	records := []models.Client{}
 	errFinding := db.Find(&records).Error
 	if errFinding != nil {
@@ -119,3 +119,5 @@ func GetAll(db *gorm.DB) ([]models.Client , error) {
 
 	return records , nil
 }
+
+

@@ -42,8 +42,6 @@ func ContractRoutes(e *echo.Group, db *gorm.DB) error{
 		return handlers.UpdateLifeContract(c, db)
 	})
 
-
-
 	protectedAdmin.GET("/life/client/:id" , func ( c echo.Context) error {
 		return handlers.GetClientLifeInsurrance(c , db)
 	})
@@ -55,6 +53,11 @@ func ContractRoutes(e *echo.Group, db *gorm.DB) error{
 	protectedAdmin.PUT("/life/:id/reject", func(c echo.Context) error {	
 		return handlers.RejectLifeContract(c, db)
 	})
+
+	protectedAdmin.GET("/life", func(c echo.Context) error {
+		return handlers.GetAllLifeContracts(c, db)
+	})
+
 
 	return nil 
 	

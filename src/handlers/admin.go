@@ -187,3 +187,94 @@ func GetAdminProfile(c echo.Context, db *gorm.DB) error {
 			"admin": admin,
 			})	
 }
+
+
+func AdminStat(c echo.Context, db*gorm.DB) error {
+	idAdmin := c.Get("admin")	
+	
+	if idAdmin == nil {
+		return c.JSON(401,
+			map[string]interface{}{
+				"message": "Unauthorized",
+			})
+	}
+
+	adminServices := services.AdminService{}
+	record, errFinding := adminServices.FindAdminBy("id", fmt.Sprintf("%v" , idAdmin), db)
+	if errFinding != nil {
+		return c.JSON(500,
+			map[string]interface{}{
+				"message": "Error finding record",
+				"error": errFinding,
+			})
+	}
+
+	if record.ID == 0 {
+		return c.JSON(404,
+			map[string]interface{}{
+				"message": "Record not found",
+			})
+	}
+
+
+	clientServices := services.ServiceImpl{}
+	contractServices := services.LifeInsuranceService{}
+	clients, errClients := clientServices.GetAll(db)
+	if errClients != nil {
+		return c.JSON(500,
+			map[string]interface{}{
+				"message": "Error fetching clients",
+				"error": errClients,
+			})
+	}
+
+	contracts, errContracts := contractServices.GetAllLifeContracts(db)
+	if errContracts != nil {
+		return c.JSON(500,
+			map[string]interface{}{
+				"message": "Error fetching contracts",
+				"error": errContracts,
+			})
+	}
+
+	pendingContracts, errPending := contractServices.GetPendingContracts(db)
+	if errPending != nil {
+		return c.JSON(500,
+			map[string]interface{}{
+				"message": "Error fetching pending contracts",
+				"error": errPending,
+			})
+	}
+
+	acceptedContracts, errAccepted := contractServices.GetApprovedContracts(db)
+	if errAccepted != nil {
+
+		return c.JSON(500,
+			map[string]interface{}{
+				"message": "Error fetching accepted contracts",
+				"error": errAccepted,
+			})
+	}
+
+	rejectedContracts, errRejected := contractServices.GetRejectedContracts(db)
+
+	if errRejected != nil {
+		return c.JSON(500,
+			map[string]interface{}{
+				"message": "Error fetching rejected contracts",
+				"error": errRejected,
+			})
+	}
+
+	stat := map[string]interface{}{
+		"clients": len(clients),
+		"contracts": len(contracts),
+		"pending_contracts": len(pendingContracts),
+		"accepted_contracts": len(acceptedContracts),
+		"rejected_contracts": len(rejectedContracts),
+		"total":  len(contracts) + len(pendingContracts) + len(acceptedContracts) + len(rejectedContracts),
+		
+	}
+
+	return c.JSON(200,stat)
+}

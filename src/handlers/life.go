@@ -263,6 +263,10 @@ func GetLifeContractsAsClient(c echo.Context , db*gorm.DB) error {
 		})
 	}
 
+
+	
+
+
 	return c.JSON(
 		200 , map[string]interface{}{
 			"contracts" : lifes,
@@ -672,3 +676,66 @@ func UpdateLifeContract(c echo.Context, db *gorm.DB) error {
 	})
 
 }
+
+
+func GetAllLifeContracts(c echo.Context, db *gorm.DB) error {
+	idAdmin := c.Get("admin")	
+	if idAdmin == nil {
+		return c.JSON(400, map[string]interface{}{
+			"message" : "Unauthorized, Please Login",
+
+		})
+	}
+
+	adminServices := services.AdminService{}
+
+	admin, errGettingAdmin := adminServices.FindAdminBy("id", fmt.Sprintf("%v", idAdmin) , db)	
+
+	if errGettingAdmin != nil  || admin.ID == 0{
+		return c.JSON(
+			404, map[string]interface{}{
+				"message":"Admin is not found",
+			},
+		)
+
+	}
+
+	lifeServices := services.LifeInsuranceService{}
+
+	lifeContracts, err := lifeServices.GetAllLifeContracts(db)
+
+
+
+
+
+	if err != nil {
+		return c.JSON(400, map[string]interface{}{
+			"message": "error getting life contracts",
+		})
+	}
+
+
+	data := []map[string]interface{}{}	
+
+	for _, lifeContract := range lifeContracts {
+		clientServices := services.ServiceImpl{}
+		client, err := clientServices.FindOneBy("id", fmt.Sprintf("%v", lifeContract.ClientID), db)
+		if err != nil {
+			return c.JSON(400, map[string]interface{}{
+				"message": "error getting client",
+			})
+		}
+
+		data = append(data, map[string]interface{}{
+			"client": client,
+			"life_contract": lifeContract,
+		})
+	}
+
+
+
+	return c.JSON(200, map[string]interface{}{
+		"message": "life contracts",
+		"data": data,
+	})
+}	
