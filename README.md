@@ -1,4 +1,4 @@
-# Project Name
+# Tendanz Insurrance
 
 This project uses Docker Compose to manage several services, including a Go server, PostgreSQL, Redis, pgAdmin, and Jenkins. Below are the instructions to set up and run the project using Docker Compose and expose the necessary services.
 
