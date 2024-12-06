@@ -74,9 +74,6 @@ func (u *LifeInsuranceService)GetLifeContractsByClient(clientID string, db *gorm
 	return lifeContracts, nil
 }	
 
-
-
-
 func (u* LifeInsuranceService)UpdateLifeContract(record models.LifeInsurance, db *gorm.DB) (models.LifeInsurance, error) {
 	errUpdating := db.Save(&record).Error
 

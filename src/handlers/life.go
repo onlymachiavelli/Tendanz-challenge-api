@@ -574,3 +574,101 @@ func GetOneLifeContractByClient(c echo.Context, db *gorm.DB) error {
 
 
 }
+
+
+
+
+//client updates it 
+func UpdateLifeContract(c echo.Context, db *gorm.DB) error {	
+
+	idClient := c.Get("client")	
+
+
+	//patch one
+	payload := requests.UpdateLifeContract{}
+	if idClient == nil {
+		return c.JSON(400, map[string]interface{}{
+			"message" : "Unauthorized, Please Login",
+		})
+	}
+
+
+	clientServices := services.ServiceImpl{}
+
+	client, errGettingClient := clientServices.FindOneBy("id",fmt.Sprintf("%v" , idClient), db)
+
+	if errGettingClient != nil  || client.ID == 0{
+		return c.JSON(
+			404, map[string]interface{}{
+				"message":"Client is not found",
+			},
+		)
+	}
+
+	lifeContractServices := services.LifeInsuranceService{}
+
+	lifeContractId := c.Param("id")
+
+	if lifeContractId == "" {
+		return c.JSON(400, map[string]interface{}{
+			"message" : "Please select a contract",
+		})
+	}
+
+
+
+	lifeContract, errGettingLifeContract := lifeContractServices.GetOneLifeContract(lifeContractId, db)
+
+	if errGettingLifeContract != nil {
+		return c.JSON(400, map[string]interface{}{
+			"message" : "Error while getting the contract",
+		})
+	}
+
+	if lifeContract.ID == 0 {
+		return c.JSON(400, map[string]interface{}{
+			"message" : "Contract not found",
+		})
+	}
+
+	if lifeContract.ClientID != int(client.ID) {
+		return c.JSON(400, map[string]interface{}{
+			"message" : "Unauthorized",
+		})
+	}
+
+
+	if lifeContract.Status == "approved" {
+		return c.JSON(400, map[string]interface{}{
+			"message": "contract already approved",
+		})
+	}
+
+	if err := c.Bind(&payload); err != nil {
+		return c.JSON(400, map[string]interface{}{
+			"message": "invalid payload",
+		})
+	}
+
+
+	lifeContract.FaceAmount = payload.FaceAmount
+	lifeContract.PremiumAmount = payload.PremiumAmount
+	lifeContract.PolicyTerm = payload.PolicyTerm
+	lifeContract.BenificiaryName = payload.BenificiaryName
+	lifeContract.EffectiveDate = payload.EffectiveDate
+	lifeContract.ExpirationDate = payload.ExpirationDate
+	lifeContract.UpdatedAt = time.Now()
+	updatedLifeContract, err := lifeContractServices.UpdateLifeContract(lifeContract, db)
+
+	if err != nil {
+		return c.JSON(400, map[string]interface{}{
+			"message": "error updating life contract",
+		})
+	}
+
+	return c.JSON(200, map[string]interface{}{
+		"message": "life contract updated",
+		"data": updatedLifeContract,
+	})
+
+}

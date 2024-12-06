@@ -16,6 +16,14 @@ type CREATELIFECONTRACT struct {
 	ExpirationDate time.Time `json:"expiration_date" binding:"required"`
 }
 
+type UpdateLifeContract struct {	
+	FaceAmount                        int     `json:"face_amount" binding:"required"`
+	PremiumAmount                     float64 `json:"premium_amount" binding:"required"`
+	PolicyTerm                        int     `json:"policy_term" binding:"required"`
+	BenificiaryName                   string  `json:"benificiary_name" binding:"required"`
+	EffectiveDate time.Time `json:"effective_date" binding:"required"`
+	ExpirationDate time.Time `json:"expiration_date" binding:"required"`
+}
 
 type AcceptRejectLifeContract struct {
 	Message string `json:"message" binding:"required"`

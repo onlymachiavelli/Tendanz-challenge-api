@@ -17,6 +17,10 @@ func ContractRoutes(e *echo.Group, db *gorm.DB) error{
 	protectedAdmin := e.Group("")
 	protectedAdmin.Use(middleware.AdminAuth)
 
+	protectedClient.GET("/life/stats", func(c echo.Context) error {
+		return handlers.GetStatsForClient(c, db)	
+	})
+
 
 	protectedClient.POST("/life", func(c echo.Context) error {
 		return handlers.CreateLifeInsurranceContract(c, db)
@@ -33,6 +37,11 @@ func ContractRoutes(e *echo.Group, db *gorm.DB) error{
 	protectedClient.DELETE("/life/:id", func(c echo.Context) error {	
 		return handlers.DeleteLifeInsurrance(c, db)
 	})
+
+	protectedClient.PATCH("/life/:id", func(c echo.Context) error {	
+		return handlers.UpdateLifeContract(c, db)
+	})
+
 
 
 	protectedAdmin.GET("/life/client/:id" , func ( c echo.Context) error {
