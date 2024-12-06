@@ -7,9 +7,9 @@ services:
       dockerfile: Dockerfile
     container_name: go_server
     ports:
-      - "6443:6443"
+      - "80:80"
     environment:
-      - PORT=6443
+      - PORT=80
       - DATABASE_URL=postgresql://user:root@postgres:2345/tendanz
       - REDIS_URL=redis://redis:6379
     depends_on:
