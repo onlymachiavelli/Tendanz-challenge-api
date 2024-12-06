@@ -14,14 +14,14 @@ Before running the services, ensure you have the following installed:
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/your-repository.git
-   cd your-repository
+   git clone https://github.com/onlymachiavelli/Tendanz-challenge-api
+   cd Tendanz-challenge-api
    ```
 
 2. Build the Docker images (if not already done):
 
    ```bash
-   docker-compose build
+   docker-compose up -d
    ```
 
 ## Running Docker Compose
