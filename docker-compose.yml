@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: go_server
     ports:
-      - "8080:80"
+      - "80:80"
     environment:
       - PORT=80
       - DATABASE_URL=postgresql://user:root@postgres:2345/tendanz
